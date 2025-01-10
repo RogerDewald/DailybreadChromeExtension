@@ -1,0 +1,213 @@
+html {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: x-large;
+    background-color: #ebeff5;
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    width: 300px;
+}
+
+.left-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 50%;
+}
+
+.input-column {
+    z-index: 10;
+    margin-top: 20;
+    position: sticky;
+    position: -webkit-sticky;
+    /* Safari */
+
+    top: 23px;
+    padding: 10px;
+
+    outline: 2px;
+    outline-style: solid;
+    outline-width: 2px;
+    border-radius: 10px;
+    /* Adjust the value to control the roundness of the corners */
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
+    background-color: #ebeff5;
+
+    margin: 20px;
+}
+
+#options-row {
+    display: flex;
+    justify-content: center;
+}
+
+#options-set{
+    display: flex;
+    align-items: center;
+    padding: 0px;
+    height: 2rem;
+}
+#options-set-column{
+    display: flex;
+    flex-direction: column;
+    gap: 0px;
+}
+
+.imgAnchor {
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    position: -webkit-sticky;
+    top: 224px;
+    width: 100%;
+}
+
+img {
+    width: 100%;
+}
+
+.output-column {
+    display: block;
+    outline: 2px;
+    outline-style: solid;
+    outline-width: 2px;
+    border-radius: 10px;
+    /* Adjust the value to control the roundness of the corners */
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
+    background-color: aliceblue;
+
+}
+
+input {
+    margin: 10px;
+    border-radius: 5px;
+}
+
+#inputDate {
+    background: lightcyan;
+}
+
+#inputDate:hover {
+    filter: brightness(90%)
+}
+
+button {
+    color: black;
+    background: lightcyan;
+    margin-left: 9px;
+    border-radius: 5px;
+    padding: 7px;
+}
+
+.dynamic-inputs {
+    padding: 3px;
+}
+
+button:hover {
+    filter: brightness(90%)
+}
+
+li {
+    margin: 10px;
+}
+
+.dateList {
+    list-style: none;
+    text-align: center;
+    padding-top: 10px;
+}
+
+select {
+    color: black;
+    background: lightcyan;
+    margin: 10px;
+    margin-left: 9px;
+    border-radius: 5px;
+}
+
+select:hover {
+    filter: brightness(90%)
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+/* Style for the popup box */
+.popup {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.loading-container {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: rgba(36, 47, 63, 0.25);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 998;
+}
+
+.loader {
+  width: 45px;
+  aspect-ratio: 1;
+  --c: no-repeat linear-gradient(#000 0 0);
+  background: 
+    var(--c) 0%   50%,
+    var(--c) 50%  50%,
+    var(--c) 100% 50%;
+  background-size: 20% 100%;
+  animation: l1 1s infinite linear;
+}
+
+@keyframes l1 {
+  0%  {background-size: 20% 100%,20% 100%,20% 100%}
+  33% {background-size: 20% 10% ,20% 100%,20% 100%}
+  50% {background-size: 20% 100%,20% 10% ,20% 100%}
+  66% {background-size: 20% 100%,20% 100%,20% 10% }
+  100%{background-size: 20% 100%,20% 100%,20% 100%}
+}
+
+@media (max-width: 1354px) {
+    .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .left-column {
+        order: 2;
+    }
+
+    .output-column {
+        order: 1;
+    }
+    #options-set{
+        height: 2.5rem;
+    }
+    #options-row{
+        display: flex;
+        flex-direction: column;
+        gap: 0px;
+    }
+    button{
+        margin: 5px;
+    }
+}
+

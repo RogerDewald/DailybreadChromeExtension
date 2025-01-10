@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles/styles.css" type="text/css">
+    <title>Daily Bread</title>
+</head>
+
+<body>
+    <div class="container">
+        <div class="left-column">
+            <div id="button-column" class="input-column">
+                <div id="options-set-column">
+                    <div id="options-set">
+                        <select id="bookSelect" class="dynamic-inputs">
+                            <option value="1">Matthew</option>
+                            <option value="2">Mark</option>
+                            <option value="3">Luke</option>
+                            <option value="4">John</option>
+                            <option value="5">Acts</option>
+                            <option value="6">Romans</option>
+                            <option value="7">1 Corinthians</option>
+                            <option value="8">2 Corinthians</option>
+                            <option value="9">Galatians</option>
+                            <option value="10">Ephesians</option>
+                            <option value="11">Phillipians</option>
+                            <option value="12">Colossians</option>
+                            <option value="13">1 Thessalonians</option>
+                            <option value="14">2 Thessalonians</option>
+                            <option value="15">1 Timothy</option>
+                            <option value="16">2 Timothy</option>
+                            <option value="17">Titus</option>
+                            <option value="18">Philemon</option>
+                            <option value="19">Hebrews</option>
+                            <option value="20">James</option>
+                            <option value="21">1 Peter</option>
+                            <option value="22">2 Peter</option>
+                            <option value="23">1 John</option>
+                            <option value="24">2 John</option>
+                            <option value="25">3 John</option>
+                            <option value="26">Jude</option>
+                            <option value="27">Revelations</option>
+                        </select>
+                        <p> Starting book </p>
+                    </div>
+
+                    <div id="options-set">
+                        <select id="chapterSelect" class="dynamic-inputs">
+                        </select>
+                        <p> Starting chapter</p>
+                    </div>
+
+                    <div id="options-set">
+                        <input type="date" id="inputDate" class="dynamic-inputs">
+                        <p>Previous Thursday </p>
+                    </div>
+                </div>
+
+                <div id="options-row">
+                    <button id="weeklyBread"> Calculate This Week's Verses</button>
+                    <button id="clearData"> Clear Data </button>
+                    <button id="uploadData"> Upload Data </button>
+                    <button id="totalVerses"> Total Verse Count </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="outputColumnMain">
+            <ul id="output" class="output-column" style="outline-width: 0px;"></ul>
+        </div>
+    </div>
+
+    <div id="popupContainer" class="overlay" style="display:none;">
+        <div class="popup">
+            <label for="textInput">What is your name? Mine is Daniel.</label><br>
+            <input type="text" id="textInput"><br><br>
+            <button id="close">OK</button>
+            <button id="cancel">Cancel</button>
+        </div>
+    </div>
+    <div id="loading-container" class="loading-container" style="display:none;">
+        <span class="loader"><span class="loader-inner"></span></span>
+    </div>
+
+    <script src="popup.js" type="module"></script>
+
+</body>
+
+</html>
