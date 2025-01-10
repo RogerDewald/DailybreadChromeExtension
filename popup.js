@@ -419,3 +419,15 @@ function instantiateToday() {
     const thedate = `${year}-${month}-${day}`;
     return thedate
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+    chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+       const currentTab = tabs[0] 
+        if (currentTab.url.includes("airtable.com")) {
+            document.getElementById("yo2").remove()
+        }
+        else {
+            document.getElementById("yo1").remove()
+        }
+    })
+})
