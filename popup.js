@@ -1,4 +1,5 @@
 createChapterSelect()
+instantiateFields()
 
 document.getElementById("clearData").addEventListener("click", function() {
     var list = document.getElementById("output")
@@ -84,6 +85,8 @@ function getFromAllVersesArray() {
     const startingChapter = parseInt(document.getElementById("chapterSelect").value)
     const startingBook = parseInt(document.getElementById("bookSelect").value)
     const chapterLimit = 8
+    localStorage.setItem("book", startingBook)
+    localStorage.setItem("chapter", startingChapter)
     let j = startingChapter
 
     let arr = []
@@ -179,6 +182,8 @@ async function retrieveData(tabs) {
     const url = `https://api.airtable.com/v0/${baseId}/${tableName}?filterByFormula=${encodeURIComponent(filterFormula)}`;
 
     const ul = document.getElementById("output")
+
+    localStorage.setItem("date", dateToFilter)
 
     // Set up the request headers
     let headers = {
@@ -433,4 +438,12 @@ async function uploadData() {
                 console.error('Error:', error);
             });
     })
+}
+
+function instantiateFields(){
+    if (localStorage.getItem("date") && localStorage.getItem("chapter") && localStorage.getItem("book")) {
+        document.getElementById("inputDate").value = localStorage.getItem("date")
+        document.getElementById("chapterSelect").value = localStorage.getItem("chapter")
+        document.getElementById("bookSelect").value = localStorage.getItem("book")
+    }
 }
