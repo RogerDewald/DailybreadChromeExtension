@@ -1,8 +1,4 @@
 createChapterSelect()
-const isToday = new Date()
-const formattedDate = instantiateDate()
-const formattedToday = instantiateToday()
-setBookAndChapter()
 
 document.getElementById("clearData").addEventListener("click", function() {
     var list = document.getElementById("output")
@@ -106,9 +102,6 @@ function getFromAllVersesArray() {
             chapterIndexArray.push(j)
 
             if (count == chapterLimit) {
-                if (isToday.getDay() == 4) {
-                    setVerseData(chapterIndexArray[0], chapterIndexArray.pop(), bookIndexArray[0], bookIndexArray.pop())
-                }
                 return arr
             }
         }
@@ -128,9 +121,6 @@ function getFromAllVersesArray() {
             chapterIndexArray.push(j)
 
             if (count == chapterLimit) {
-                if (isToday.getDay() == 4) {
-                    setVerseData(chapterIndexArray[0], chapterIndexArray.pop(), bookIndexArray[0], bookIndexArray.pop())
-                }
                 return arr
             }
         }
@@ -254,10 +244,99 @@ function createChapterSelect() {
     });
 }
 
+async function calculateAllVerses() {
+    chrome.tabs.query({ active: true, currentWindow: true }, async tabs => {
+        tabs[0].url.split("/")
+        const airtableURL = new URL(tabs[0].url)
+        const parsedAirtableURL = airtableURL.pathname.split("/")
+
+        const baseId = parsedAirtableURL[1]
+        const tableName = parsedAirtableURL[2]
+        let apiKey = ""
+        try {
+            const apiKeyHeaders = await fetch("https://ccodailybread.vercel.app/api/receive")
+            apiKey = await apiKeyHeaders.text()
+        }
+        catch {
+            alert("Website Down, contact Daniel")
+        }
+
+        // Construct the URL to fetch data from Airtable
+        const url = `https://api.airtable.com/v0/${baseId}/${tableName}`
+
+        // Set up the request headers
+        let headers = {
+            Authorization: `Bearer ${apiKey}`,
+        };
+
+        // Make the GET request to retrieve records
+        const response = await fetch(url, { headers })
+        const json = await response.json()
+        const data = json.records
+
+        let total = 0
+        data.forEach(e => {
+            total += (parseInt(e.fields["Verse Count"])) ? parseInt(e.fields["Verse Count"]) : 0
+        })
+
+        const ul = document.getElementById("output")
+        const dateLi = document.createElement('li')
+        dateLi.className = "dateList"
+        const li = document.createElement('li')
+
+        li.textContent = `Total verses read: ${total}`
+        dateLi.textContent = findSemester()
+
+        ul.appendChild(dateLi)
+        ul.appendChild(li)
+    })
+}
+
+function findSemester() {
+    const date = getDate()
+    const prePrettyDate = date.split("-")
+    const month = prePrettyDate[1]
+    return (month < 6) ? "Spring Semester" : "Fall Semester"
+
+}
+
+function setVerseData(chapterStart, chapterEnd, bookStart, bookEnd) {
+    let jsonData = {
+        bookstart: bookStart,
+        bookend: bookEnd,
+        chapterstart: chapterStart,
+        chapterend: chapterEnd
+    }
+    localStorage.setItem(formattedDate, JSON.stringify(jsonData))
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+        const currentTab = tabs[0]
+        if (currentTab.url.includes("airtable.com")) {
+            document.getElementById("yo2").remove()
+        }
+        else {
+            document.getElementById("yo1").remove()
+        }
+    })
+})
+
+function openPopup() {
+    var popup = document.getElementById("popupContainer");
+    popup.style.display = "flex";
+    document.getElementById("textInput").focus()
+}
+
+function closePopup() {
+    var popup = document.getElementById("popupContainer");
+    popup.style.display = "none";
+}
+
 async function authorize() {
     let nameAuthorization = ""
 
-    await fetch("/api/nameid")
+    await fetch("https:/ccodailybread.vercel.app/api/nameid")
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
@@ -280,154 +359,78 @@ async function authorize() {
     }
 }
 
-async function calculateAllVerses() {
-    let apiKey = ""
-    try {
-        const apiKeyHeaders = await fetch("/api/receive")
-        apiKey = await apiKeyHeaders.text()
-    }
-    catch {
-        alert("Website Down, contact Daniel")
-    }
+async function uploadData() {
+    chrome.tabs.query({ active: true, currentWindow: true }, async tabs => {
+        tabs[0].url.split("/")
 
-    const baseId = 'appV7WLGs7utmV0m8';
-    const tableName = 'tblrrXdYBMFIvYPlE'; // Replace with your table name
+        const airtableURL = new URL(tabs[0].url)
+        const parsedAirtableURL = airtableURL.pathname.split("/")
 
-    // Construct the URL to fetch data from Airtable
-    const url = `https://api.airtable.com/v0/${baseId}/${tableName}`
+        const baseId = parsedAirtableURL[1]
+        const tableName = parsedAirtableURL[2]
 
-    // Set up the request headers
-    let headers = {
-        Authorization: `Bearer ${apiKey}`,
-    };
+        let apiKey = ""
+        await fetch("https:/ccodailybread.vercel.app/api/upload")
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.text()
+            })
+            .then(data => {
+                apiKey = data
+            })
+            .catch(error => { console.error("error:", error) })
 
-    // Make the GET request to retrieve records
-    const response = await fetch(url, { headers })
-    const json = await response.json()
-    const data = json.records
+        const dateToFilter = getDate(); // Replace with your desired date
+        const filterFormula = `DATETIME_FORMAT({Reading date beginning}, 'YYYY-MM-DD') = '${dateToFilter}'`;
 
-    let total = 0
-    data.forEach(e => {
-        total += (parseInt(e.fields["Verse Count"])) ? parseInt(e.fields["Verse Count"]) : 0
+        const url = `https://api.airtable.com/v0/${baseId}/${tableName}?filterByFormula=${encodeURIComponent(filterFormula)}`;
+
+        const headers = {
+            Authorization: `Bearer ${apiKey}`,
+            'Content-type': 'application/json',
+        };
+
+        fetch(url, { headers })
+            .then(response => response.json())
+            .then(data => {
+                let verseCount = 0
+                for (let i = 0; i < data.records.length; i++) {
+
+                    if (data.records[i].fields["I completed every chapter this week"] == true) {
+                        verseCount = getTotalCount()
+                    }
+                    else {
+                        verseCount = getVerseCount(data.records[i].fields["Days reporting"])
+                    }
+
+                    const recordIdToUpdate = data.records[i].id;
+                    const updateUrl = `https://api.airtable.com/v0/${baseId}/${tableName}/${recordIdToUpdate}`;
+
+                    const updatedRecord = {
+                        fields: {
+                            "Verse Count": verseCount,
+                        },
+
+                    };
+
+                    fetch(updateUrl, {
+                        method: 'PATCH',
+                        headers,
+                        body: JSON.stringify(updatedRecord),
+                    })
+                        .then(response => response.json())
+                        .then(() => {
+                            alert("It is finished")
+                        })
+                        .catch(error => {
+                            console.error('Error updating record:', error);
+                        });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
     })
-
-    const ul = document.getElementById("output")
-    const dateLi = document.createElement('li')
-    dateLi.className = "dateList"
-    const li = document.createElement('li')
-
-    li.textContent = `Total verses read: ${total}`
-    dateLi.textContent = findSemester()
-
-    ul.appendChild(dateLi)
-    ul.appendChild(li)
-
 }
-
-function findSemester() {
-    const date = getDate()
-    const prePrettyDate = date.split("-")
-    const month = prePrettyDate[1]
-    return (month < 6) ? "Spring Semester" : "Fall Semester"
-
-}
-
-function setVerseData(chapterStart, chapterEnd, bookStart, bookEnd) {
-    let jsonData = {
-        bookstart: bookStart,
-        bookend: bookEnd,
-        chapterstart: chapterStart,
-        chapterend: chapterEnd
-    }
-    localStorage.setItem(formattedDate, JSON.stringify(jsonData))
-}
-
-function instantiateDate() {
-    const today = new Date();
-
-    // Calculate how many days we need to go back to reach the previous Thursday
-    let daysBack;
-    if (today.getDay() === 4) {
-        // If today is Thursday, go back one week (7 days)
-        daysBack = 7;
-    } else {
-        // If today is not Thursday, go back to the Thursday from two weeks prior
-        const daysSinceThursday = (today.getDay() - 4 + 7) % 7;
-        daysBack = daysSinceThursday + 7; // Adding another 7 days for two weeks ago
-    }
-
-    // Set the date to the previous Thursday
-    const lastThursday = new Date(today);
-    lastThursday.setDate(today.getDate() - daysBack);
-
-    // Format the date to YYYY-MM-DD for the date input
-    const year = lastThursday.getFullYear();
-    const month = String(lastThursday.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
-    const day = String(lastThursday.getDate()).padStart(2, '0');
-
-    const formattedDate = `${year}-${month}-${day}`;
-    document.getElementById('inputDate').value = formattedDate;
-    return formattedDate
-}
-
-function get2ThursdaysBack() {
-    const today = new Date();
-
-    let daysBack = 14
-    const lastThursday = new Date(today);
-    lastThursday.setDate(today.getDate() - daysBack);
-
-    // Format the date to YYYY-MM-DD for the date input
-    const year = lastThursday.getFullYear();
-    const month = String(lastThursday.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
-    const day = String(lastThursday.getDate()).padStart(2, '0');
-
-    const newDate = `${year}-${month}-${day}`;
-    return newDate
-}
-
-function setBookAndChapter() {
-    const theThursday = get2ThursdaysBack()
-    let json = JSON.parse(localStorage.getItem(formattedDate)) || {}
-    if (isToday.getDate() == 4 && !json.hasOwnProperty(formattedToday)) {
-        let theThursdayJson = JSON.parse(localStorage.getItem(theThursday)) || {}
-        let autoStartChapter = parseInt(theThursdayJson.endchapter || 1) + 1
-        let autoStartBook = parseInt(theThursdayJson.endbook || 1)
-
-        if (autoStartChapter >= allVersesArray[autoStartBook].length) {
-            autoStartChapter = 1
-            if (autoStartBook == 12) {
-                autoStartBook = 1
-            }
-            else {
-                autoStartBook += 1
-            }
-        }
-        document.getElementById("chapterSelect").value = autoStartBook
-        document.getElementById("bookSelect").value = autoStartBook
-    }
-    else {
-        document.getElementById("chapterSelect").value = json.startchapter || 21
-        document.getElementById("bookSelect").value = json.startbook || 22
-    }
-}
-
-function instantiateToday() {
-    const year = isToday.getFullYear();
-    const month = String(isToday.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
-    const day = String(isToday.getDate()).padStart(2, '0');
-    const thedate = `${year}-${month}-${day}`;
-    return thedate
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-    chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-       const currentTab = tabs[0] 
-        if (currentTab.url.includes("airtable.com")) {
-            document.getElementById("yo2").remove()
-        }
-        else {
-            document.getElementById("yo1").remove()
-        }
-    })
-})
